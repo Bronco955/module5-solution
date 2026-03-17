@@ -60,6 +60,11 @@ var switchMenuToActive = function () {
   }
 };
 
+// TODO: STEP 0: Функция для генерации случайного целого числа
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+  
 // On page load (before images or CSS)
 document.addEventListener("DOMContentLoaded", function (event) {
 
@@ -83,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 showLoading("#main-content");
 $ajaxUtils.sendGetRequest(
   allCategoriesUrl,
-  [...], // ***** <---- TODO: STEP 1: Substitute [...] ******
+  buildAndShowHomeHtml, // ***** <---- TODO: STEP 1: Substitute [...] ******
   true); // Explicitly setting the flag to get JSON from server processed into an object literal
 });
 // *** finish **
@@ -104,28 +109,29 @@ function buildAndShowHomeHTML (categories) {
       // var chosenCategoryShortName = ....
 
 
-      // TODO: STEP 3: Substitute {{randomCategoryShortName}} in the home html snippet with the
-      // chosen category from STEP 2. Use existing insertProperty function for that purpose.
-      // Look through this code for an example of how to do use the insertProperty function.
-      // WARNING! You are inserting something that will have to result in a valid Javascript
-      // syntax because the substitution of {{randomCategoryShortName}} becomes an argument
-      // being passed into the $dc.loadMenuItems function. Think about what that argument needs
-      // to look like. For example, a valid call would look something like this:
-      // $dc.loadMenuItems('L')
-      // Hint: you need to surround the chosen category short name with something before inserting
-      // it into the home html snippet.
-      //
-      // var homeHtmlToInsertIntoMainPage = ....
+     // Builds HTML for the home page based on categories array
+// returned from the server.
+function buildAndShowHomeHTML (categories) {
 
+  // Load home snippet page
+  $ajaxUtils.sendGetRequest(
+    homeHtmlUrl,
+    function (homeHtml) {
 
-      // TODO: STEP 4: Insert the produced HTML in STEP 3 into the main page
-      // Use the existing insertHtml function for that purpose. Look through this code for an example
-      // of how to do that.
-      // ....
+      // STEP 2: Выбираем случайную категорию с помощью готовой функции
+      var chosenCategory = chooseRandomCategory(categories);
+      var chosenCategoryShortName = chosenCategory.short_name;
+
+      // STEP 3: Подставляем short_name в шаблон. 
+      // Оборачиваем в одинарные кавычки "'", чтобы в HTML получилось loadMenuItems('L')
+      var homeHtmlToInsertIntoMainPage = insertProperty(homeHtml, "randomCategoryShortName", "'" + chosenCategoryShortName + "'");
+
+      // STEP 4: Вставляем полученный HTML в основной блок страницы
+      insertHtml("#main-content", homeHtmlToInsertIntoMainPage);
 
     },
-    false); // False here because we are getting just regular HTML from the server, so no need to process JSON.
-}
+    false); // False, так как мы получаем обычный HTML-шаблон
+} 
 
 
 // Given array of category objects, returns a random category object.
